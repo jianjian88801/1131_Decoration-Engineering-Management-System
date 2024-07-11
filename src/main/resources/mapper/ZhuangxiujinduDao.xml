@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ZhuangxiujinduDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.lixiangxiangmu_id as lixiangxiangmuId
+        ,a.zhuangxiujindu_name as zhuangxiujinduName
+        ,a.zhuangxiujindu_photo as zhuangxiujinduPhoto
+        ,a.zhuangxiujindu_text as zhuangxiujinduText
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ZhuangxiujinduView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,lixiangxiangmu.lixiangxiangmu_uuid_number as lixiangxiangmuUuidNumber
+        ,lixiangxiangmu.lixiangxiangmu_name as lixiangxiangmuName
+        ,lixiangxiangmu.yonghu_id as lixiangxiangmuYonghuId
+        ,lixiangxiangmu.kehu_id as lixiangxiangmuKehuId
+        ,lixiangxiangmu.lixiangxiangmu_types as lixiangxiangmuTypes
+        ,lixiangxiangmu.lixiangxiangmu_file as lixiangxiangmuFile
+        ,lixiangxiangmu.lixiangxiangmu_yesno_types as lixiangxiangmuYesnoTypes
+        ,lixiangxiangmu.lixiangxiangmu_yesno_text as lixiangxiangmuYesnoText
+
+        FROM zhuangxiujindu  a
+        left JOIN lixiangxiangmu lixiangxiangmu ON a.lixiangxiangmu_id = lixiangxiangmu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.lixiangxiangmuId != null and params.lixiangxiangmuId != ''">
+                and (
+                    a.lixiangxiangmu_id = #{params.lixiangxiangmuId}
+                )
+            </if>
+            <if test=" params.zhuangxiujinduName != '' and params.zhuangxiujinduName != null and params.zhuangxiujinduName != 'null' ">
+                and a.zhuangxiujindu_name like CONCAT('%',#{params.zhuangxiujinduName},'%')
+            </if>
+            <if test=" params.zhuangxiujinduText != '' and params.zhuangxiujinduText != null and params.zhuangxiujinduText != 'null' ">
+                and a.zhuangxiujindu_text like CONCAT('%',#{params.zhuangxiujinduText},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断立项项目的id不为空 -->
+            <if test=" params.lixiangxiangmuIdNotNull != '' and params.lixiangxiangmuIdNotNull != null and params.lixiangxiangmuIdNotNull != 'null' ">
+                and a.lixiangxiangmu_id IS NOT NULL
+            </if>
+            <if test=" params.lixiangxiangmuUuidNumber != '' and params.lixiangxiangmuUuidNumber != null and params.lixiangxiangmuUuidNumber != 'null' ">
+                and lixiangxiangmu.lixiangxiangmu_uuid_number like CONCAT('%',#{params.lixiangxiangmuUuidNumber},'%')
+            </if>
+            <if test=" params.lixiangxiangmuName != '' and params.lixiangxiangmuName != null and params.lixiangxiangmuName != 'null' ">
+                and lixiangxiangmu.lixiangxiangmu_name like CONCAT('%',#{params.lixiangxiangmuName},'%')
+            </if>
+            <if test="params.kehuId != null  and params.kehuId != ''">
+                and lixiangxiangmu.kehu_id = #{params.kehuId}
+            </if>
+            <if test="params.lixiangxiangmuTypes != null  and params.lixiangxiangmuTypes != ''">
+                and lixiangxiangmu.lixiangxiangmu_types = #{params.lixiangxiangmuTypes}
+            </if>
+
+            <if test="params.lixiangxiangmuYesnoTypes != null  and params.lixiangxiangmuYesnoTypes != ''">
+                and lixiangxiangmu.lixiangxiangmu_yesno_types = #{params.lixiangxiangmuYesnoTypes}
+            </if>
+
+            <if test=" params.lixiangxiangmuYesnoText != '' and params.lixiangxiangmuYesnoText != null and params.lixiangxiangmuYesnoText != 'null' ">
+                and lixiangxiangmu.lixiangxiangmu_yesno_text like CONCAT('%',#{params.lixiangxiangmuYesnoText},'%')
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
